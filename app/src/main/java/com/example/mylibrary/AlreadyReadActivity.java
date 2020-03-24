@@ -8,32 +8,33 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-public class WantToActivity extends AppCompatActivity {
-    private static final String TAG = "WantToActivity";
+public class AlreadyReadActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private BooksRecViewAdapter adapter;
 
     private Util utils;
+    private BooksRecViewAdapter adapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_want_to);
+        setContentView(R.layout.activity_already_read);
 
         overridePendingTransition(R.anim.in, R.anim.out);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         adapter = new BooksRecViewAdapter(this);
-        adapter.setType("want to read");
+        adapter.setType("already read");
         utils = new Util();
-
-        adapter.setBooks(utils.getWantToReadBooks());
 
         recyclerView = (RecyclerView) findViewById(R.id.recView);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+
+        adapter.setBooks(utils.getAlreadyReadBooks());
+
     }
 
     @Override
@@ -53,4 +54,3 @@ public class WantToActivity extends AppCompatActivity {
         overridePendingTransition(R.anim.close_in, R.anim.close_out);
     }
 }
-

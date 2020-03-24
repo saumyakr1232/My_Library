@@ -1,10 +1,13 @@
 package com.example.mylibrary;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -31,21 +35,23 @@ public class BooksRecViewAdapter  extends RecyclerView.Adapter<BooksRecViewAdapt
 
     private ArrayList<Book> books = new ArrayList<>();
     private Context context;
+    private String type = "";
+    private Util utils;
 
 
 
     public BooksRecViewAdapter(Context context) {
         this.context = context;
+        utils = new Util();
     }
     /**
      *
      * This gets called when each new ViewHolder is created. This happens when the RecyclerView
      * is laid out. Enough ViewHolders will be created to fill the screen and allow for scrolling.
      *
-     * @param ViewGroup The ViewGroup that these ViewHolders are contained within.
      * @param viewType  If your RecyclerView has more than one type of item (which ours doesn't) you
      *                  can use this viewType integer to provide a different layout. See
-     *                  {@link android.support.v7.widget.RecyclerView.Adapter#getItemViewType(int)}
+     *
      *                  for more details.
      * @return A new NumberViewHolder that holds the View for each list item
      */
@@ -73,7 +79,7 @@ public class BooksRecViewAdapter  extends RecyclerView.Adapter<BooksRecViewAdapt
     public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
         Log.d(TAG, "onBindViewHolder: called");
         holder.bookName.setText(books.get(position).getName());
-        holder.bookName.setOnClickListener(new View.OnClickListener() {
+        holder.bookCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, BookActivity.class);
@@ -82,11 +88,73 @@ public class BooksRecViewAdapter  extends RecyclerView.Adapter<BooksRecViewAdapt
             }
         });
 
+        holder.bookCard.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                final Book book = books.get(position);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(context)
+                        .setTitle("Deleting " + book.getName())
+                        .setMessage("Are you sure you want to delete "+ book.getName())
+                        .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        });
+
+                switch (type){
+                    case "want to read":
+                        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if(utils.removeWantToReadBooks(books.get(position))){
+                                    notifyDataSetChanged();
+                                    Toast.makeText(context, book.getName() + "has successfully deleted", Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        }).create().show();
+
+                        break;
+                    case "already read":
+
+                        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if(utils.removeAlreadyReadBooks(books.get(position))){
+                                    notifyDataSetChanged();
+                                    Toast.makeText(context, book.getName() + "has successfully deleted", Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        }).create().show();
+
+
+                        break;
+                    case "currently reading":
+                        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if(utils.removeCurrentlyReadingBooks(books.get(position))){
+                                    notifyDataSetChanged();
+                                    Toast.makeText(context, book.getName() + "has successfully deleted", Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        }).create().show();
+
+
+                        break;
+                    default:
+                        break;
+                }
+                return true;
+
+            }
+        });
+
 
         Glide.with(context)
                 .asBitmap()
                 .load(books.get(position).getImageUrl())
-                .error(R.drawable.ic_launcher_background)
                 .into(holder.bookImage);
 
     }
@@ -109,6 +177,7 @@ public class BooksRecViewAdapter  extends RecyclerView.Adapter<BooksRecViewAdapt
 
         private ImageView bookImage;
         private TextView bookName;
+        private CardView bookCard;
 
 
         public ViewHolder(View itemView){
@@ -116,6 +185,8 @@ public class BooksRecViewAdapter  extends RecyclerView.Adapter<BooksRecViewAdapt
 
             bookImage = (ImageView) itemView.findViewById(R.id.bookImage);
             bookName = (TextView) itemView.findViewById(R.id.bookName);
+            bookCard = (CardView) itemView.findViewById(R.id.bookCard);
+
 
         }
 
@@ -124,5 +195,9 @@ public class BooksRecViewAdapter  extends RecyclerView.Adapter<BooksRecViewAdapt
     public void setBooks(ArrayList<Book> books) {
         this.books = books;
         notifyDataSetChanged();
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

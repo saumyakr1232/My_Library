@@ -8,39 +8,38 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-public class WantToActivity extends AppCompatActivity {
-    private static final String TAG = "WantToActivity";
+public class CurrentlyReadingActivity extends AppCompatActivity {
+    private static final String TAG = "CurrentlyReadingActivit";
 
     private RecyclerView recyclerView;
     private BooksRecViewAdapter adapter;
-
     private Util utils;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_want_to);
+        setContentView(R.layout.activity_currently_reading);
 
         overridePendingTransition(R.anim.in, R.anim.out);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         adapter = new BooksRecViewAdapter(this);
-        adapter.setType("want to read");
+        adapter.setType("currently reading");
         utils = new Util();
+        adapter.setBooks(utils.getCurrentlyReadBooks());
 
-        adapter.setBooks(utils.getWantToReadBooks());
-
-        recyclerView = (RecyclerView) findViewById(R.id.recView);
+        recyclerView = (RecyclerView) findViewById(R.id.booksRecView);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+
+
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch(item.getItemId()){
+        switch (item.getItemId()){
             case android.R.id.home:
-                super.onBackPressed();
+                onBackPressed();
                 break;
             default:
                 break;
@@ -53,4 +52,3 @@ public class WantToActivity extends AppCompatActivity {
         overridePendingTransition(R.anim.close_in, R.anim.close_out);
     }
 }
-
